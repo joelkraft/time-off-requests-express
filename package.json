@@ -1,0 +1,27 @@
+{
+  "name": "TOR",
+  "version": "1.0.0",
+  "description": "A way to request time off",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "author": "Joel Kraft",
+  "license": "ISC",
+  "devDependencies": {
+    "expect.js": "0.3.1",
+    "mocha": "1.18.2",
+    "superagent": "0.21.0"
+  },
+  "dependencies": {
+    "express": "~4.9.0",
+    "mongoskin":"1.4.1",
+    "body-parser": "~1.8.1",
+    "cookie-parser": "~1.3.3",
+    "morgan": "~1.3.0",
+    "serve-favicon": "~2.1.3",
+    "debug": "~2.0.0",
+    "jade": "~1.6.0"
+  }
+}
