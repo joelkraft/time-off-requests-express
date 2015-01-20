@@ -1,0 +1,125 @@
+.page-header
+  h1 Time Off Requests 
+    small Hello, USERNAME
+div(id="mainView") 
+  .row
+    .col-md-12
+      div(class="panel panel-primary", id="request-form") 
+        .panel-heading
+          h2(class="panel-title") Time Off Request Form
+        .panel-body
+          .requestForm
+            form(class="form-inline", role="form") 
+              .row
+                .col-md-12
+                  .form-group
+                    label(class="control-label") Type of Leave:
+                    select(class="leaveType form-control", id="leaveType") 
+                      option(value="Please choose:") Please choose:
+                      option(value="Vacation") Vacation
+                      option(value="Holiday") Holiday
+                      option(value="Med/Dental") Medical / Dental Appt
+                      option(value="other") other
+              .row
+                .col-md-12
+                  .form-group
+                    label(class="control-label") Date(s) of leave:
+                    input(type="text", class="form-control", id="startDate") 
+                  to
+                  .form-group
+                    input(type="text", class="form-control", id="endDate") 
+                  .form-group
+                    button(type="button", class="btn btn-default", id="resetDates") Clear Dates
+              .row
+                .col-md-12
+                  button(type="button", class="btn btn-default", href="#partial-shift", data-toggle="collapse") Add times for partial shift
+                  div(class="panel panel-default collapse panel-set-away", id="partial-shift") 
+                    .panel-heading
+                      p(class="panel-title", id="partial-shift-title") Specify start and end times below
+                    .panel-body
+                      .form-group
+                        .row
+                          .col-md-12
+                            label(class="control-label") Leaving:
+                            input(type="text", class="form-control", id="leaveTime") 
+                        .row
+                          .col-md-12
+                            label(class="control-label") Returning:
+                            input(type="text", class="form-control", id="returnTime") 
+                        .row
+                          .col-md-12
+                            .form-group
+                              label(class="control-label") Will your partial shift(s) include a scheduled meal period?
+                              div(class="btn-group", data-toggle="buttons") 
+                                label(class="btn btn-default", id="yesMeal") 
+                                  input(type="radio", name="options")
+                                  | Yes
+                                label(class="btn btn-default", id="noMeal") 
+                                  input(type="radio", name="options")
+                                  | No
+                            div(class="panel panel-default collapse panel-set-away", id="meal-period-section") 
+                              .panel-heading
+                                p(class="panel-title", id="meal-period-options-title") Meal Period Options
+                              .panel-body
+                                .form-group
+                                  .row
+                                    .col-md-12
+                                      label What time do you prefer to schedule your meal period?
+                                      input(type="text", class="form-control", id="mealTime") 
+                                  .row
+                                    .col-md-12
+                                      label(class="control-label") How long would you like your meal period to be?
+                                      select(class="form-control", id="mealPeriodLength") 
+                                        option Please choose:
+                                        option 1/2 hour
+                                        option Full hour
+              .row
+                .col-md-12
+                  .form-group
+                    label(class="control-label") Comments:
+              .row
+                .col-md-12
+                  .form-group
+                    textarea(cols="50", rows="3", class="form-control", name="comments", id="comments")
+              .row
+                .col-md-2
+                  .form-group
+                    input(type="button", name="submit", class="btn btn-primary", id="submit", value="Submit")
+                .col-md-8
+                  .form-group
+                    div(id="formError") 
+                .col-md-2
+                  .form-group
+            
+  .row
+    .col-md-12
+      div(class="upcomingRequests panel panel-info") 
+        .panel-heading
+          h2(class="panel-title") Upcoming requests for USERNAME
+        table(class="table") 
+          tbody
+            tr
+              td Finding your active requests now...
+  .row
+    .col-md-12
+      .pastRequests
+       // input(value="Show Past Requests") 
+.row
+  .col-md-2
+  .col-md-8
+    div(class="panel panel-warning", id="requestConfirmation") 
+      div(class="displayDataToConfirm bg-warning") 
+  .col-md-2
+.row
+  .col-md-2
+  .col-md-8
+    div(class="panel panel-success", id="confirmSuccess") 
+      .bg-success
+        .row
+          .col-md-12
+            h2(class="text-success text-center") Your request was submitted.
+            p(class="text-success text-center") If you don't see it in your "Upcoming Requests" after a moment, try refreshing the page.
+        .row
+          div(class="sucessWindowCentered") 
+            button(class="btn btn-success", type="button", id="confirmationHide") OK
+  .col-md-2

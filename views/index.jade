@@ -1,5 +1,14 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  div(class='body container-fluid')
+
+  if isSupervisor
+    include ./includes/supervisor_interface.jade
+  else
+    include ./includes/employee_interface.jade
+block script
+  if isSupervisor
+    script(type='text/javascript', src='../javascripts/supervisor_interface_scripts.js')
+  else 
+    script(type='text/javascript', src='../javascripts/employee_interface_scripts.js')

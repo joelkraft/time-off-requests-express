@@ -1,0 +1,90 @@
+.supervisor-interface
+  div(id='screen')
+  .row
+    div(class='panel panel-primary', id='decisionPanel')
+      .panel-heading
+        h1(class='panel-title') Verify
+      .panel-body
+        form(class='form', role='form')
+          .row
+            .col-xs-7
+              div(class='form-group', id='decisionSwitches')
+                div(class='btn-group', data-toggle='buttons')
+                  label(class='btn btn-default', id='approve')
+                    input(type='radio', name='options', id='option1')
+                    |Approve
+                  label(class='btn btn-default', id='deny')
+                    input(type='radio', name='options', id='option2')
+                    |Deny
+                  label(class='btn btn-default', id='cancel')
+                    input(type='radio', name='options', id='option3')
+                    |Cancel
+                  label(class='btn btn-waitlist', id='waitlist')
+                    input(type='radio', name='options', id='option4')
+                    |Waitlist
+                  label(class='btn btn-default', id='pending')
+                    input(type='radio', name='options', id='option5')
+                    |Pending
+              div(class='form-group commentsBox')
+                label(class='control-label') Comments to send to 
+                  span(class='employeeName')
+                textarea(class='form-control' rows='8' id='decision_comments')
+                p WHAT IS THIS?
+              .form-group
+                input(type='button' name='submit' class='btn btn-primary' id='submitDecision' value='Submit')
+                input(type='button' name='cancel' class='btn btn-default' id='cancelDecision' value='Cancel')
+            .col-xs-5
+              .form-group
+                div(class='panel panel-info')
+                  .panel-heading
+                    h2(class='panel-title') Current Request for 
+                      span(class='employeeName')
+                  div(class='panel-body', id='detailsPanel')
+    div(class='panel panel-success confirmSuccess')
+      .bg-success
+        .row
+          .col-md-12
+            h2(class='text-success text-center') Your decision has been recorded, and an email was sent to the employee.
+        .row
+          div(class='col-md-12', class='sucessWindowCentered')
+            button(class='btn btn-success', type='button', id='confirmationHide') OK
+  div(class='row', id='successScreen')
+    .col-md-2
+    .col-md-8
+    .col-md-2
+  .page-header
+    h1 Time Off Request Management 
+      small Hello, USERNAME
+  .mainView
+    .row
+      div(class='center-block' id='allFilterDiv')
+        button(id='archiveButton', class='btn btn-default pull-right')
+          a(target='_blank' href='archiveLink') Archive NEEDS ARCHIVE LINK
+        div(class='input-group pull-right', id='filter')
+          .input-group-btn
+            button(type='button', class='btn btn-default dropdown-toggle', data-toggle='dropdown') Search 
+              span(class='caret')
+            ul(class='dropdown-menu', role='menu')
+              li
+                a(href='#' data-filter='search') Search
+              li
+                a(href='#' data-filter='holiday') Holiday
+          input(type='text' class='form-control grapes moremoutain')
+        div(class='form-group pull-right' id='deptFilterSwitches')
+          div(class='btn-group' data-toggle='buttons')
+            label(class='btn btn-default active' id='deptAll')
+              input(type='radio' name='options' id='option1')
+              |All
+            label(class='btn btn-default' id='deptStx')
+              input(type='radio' name='options' id='option2')
+              |Stacks
+            label(class='btn btn-default' id='deptCirc')
+              input(type='radio' name='options' id='option3')
+              |Circulation
+    .row
+      div(id='requests' class='center-block')
+        table(id='requestsHeader')
+        div(id='requestsBody')
+          table
+            .panel-body Loading Requests...
+          div(id='requestsBodySpacer')

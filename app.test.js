@@ -5,7 +5,7 @@ describe('express rest api server', function () {
 	var id
 
 	it('posts an object', function (done) {
-		superagent.post('http://localhost:3000/collections/test')
+		superagent.post('https://joelkraft.github.io/multcolib-paging-list-in-browser')
 			.send({
 				name: 'John',
 				email: 'john@rps.com'
