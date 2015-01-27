@@ -86,25 +86,31 @@ function init() {
   $('#returnTime').datetimepicker({pickDate:false, minuteStepping:15});
   $('#startDate').datetimepicker({pickTime:false, maxDate: (new Date().getTime() + (1000*60*60*24*365))});
   $('#endDate').datetimepicker({pickTime:false, maxDate: (new Date().getTime() + (1000*60*60*24*365))});
-  $('.html').on('click', '#resetDates', function() {$('#startDate').val(''); $('#endDate').val('');});
+  $('html').on('click', '#resetDates', function() {$('#startDate').val(''); $('#endDate').val('');});
   setCollapseButton('#partial-shift', 'Cancel partial shift');
-  $('.html').on('click', '#yesMeal', showMealPeriod);
-  $('.html').on('click', '#noMeal', hideMealPeriod);
-  $('.html').on('click', '#submit', validateForm);
-  $('.html').on('click', '#confirmCANCEL', cancelRequest);
-  $('.html').on('click', '#confirmOK', submitRequest);
-  $('.html').on('click', '#confirmationHide', hideConfirmation);
-  $('.html').on('hidden.bs.collapse', '#meal-period-section', resetBlanks);
-  $('.html').on('show.bs.collapse', '#meal-period-section', function(e){e.stopPropagation();});
-  $('.html').on('hidden.bs.collapse', '#partial-shift', resetBlanks);
+  $('html').on('click', '#yesMeal', showMealPeriod);
+  $('html').on('click', '#noMeal', hideMealPeriod);
+  $('html').on('click', '#submit', validateForm);
+  $('html').on('click', '#confirmCANCEL', cancelRequest);
+  $('html').on('click', '#confirmOK', submitRequest);
+  $('html').on('click', '#confirmationHide', hideConfirmation);
+  $('html').on('hidden.bs.collapse', '#meal-period-section', resetBlanks);
+  $('html').on('show.bs.collapse', '#meal-period-section', function(e){e.stopPropagation();});
+  $('html').on('hidden.bs.collapse', '#partial-shift', resetBlanks);
   
   // a data-id attribute was seemingly the best way to pass user id data to the client
-  var userID = $('.html').attr('data-id');
+  var userID = $('html').attr('data-id');
 
   // of course, the name tag in the h1 will supply the user name, too in this func
   GLOBAL.submissionDataInit(userID);
 
+console.log('about to make ajax call')
   // ask the datastore for all user records
+  $.ajax({
+    url:'http://localhost:3000/collections/requests?user=' + userID,
+    done:showCurrentRequests
+  })
+  console.log('just made call')
   // google.script.run
   //   .withSuccessHandler(showCurrentRequests)
   //   .getPrivateData(userID);
@@ -204,7 +210,7 @@ function showConfirmationSuccess() {
     GLOBAL.resetSubmissionData();
     // google.script.run
     //   .withSuccessHandler(showCurrentRequests)
-    //   .getPrivateData($('.html').attr('data-id'));
+    //   .getPrivateData($('html').attr('data-id'));
   });
 }
 
@@ -282,13 +288,13 @@ function setCollapseButton(selector, cancelText) {
     var $collapseContent = $(selector),
         origButtonText = $collapseContent.prev().html();
     
-    $('.html').on('show.bs.collapse', selector, {buttonText: cancelText}, function(e) {
+    $('html').on('show.bs.collapse', selector, {buttonText: cancelText}, function(e) {
       var $button = $(this).prev();
       $button.html(e.data.buttonText);
       $button.removeClass('btn-default').addClass('btn-warning');
     });
     
-    $('.html').on('hidden.bs.collapse', selector, {buttonText: origButtonText}, function(e) {
+    $('html').on('hidden.bs.collapse', selector, {buttonText: origButtonText}, function(e) {
       var $button = $(this).prev();
       $button.html(e.data.buttonText);
       $button.removeClass('btn-warning').addClass('btn-default');
@@ -615,6 +621,8 @@ function confirm(data) {
 
 // Accepts upcoming request data from server and updates view accordingly.
 function showCurrentRequests(data) {
+  console.log('showCurrentRequests fired.')
+  console.log(JSON.stringify(data))
   var reformatTimes = function(arr) {
     var stDate = moment(arr[0], 'M/D/YY').format('dddd, MMM Do'),
         enDate = arr[1] ? moment(arr[1], 'M/D/YY').format('dddd, MMM Do') : null,
