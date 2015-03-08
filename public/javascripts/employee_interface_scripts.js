@@ -20,7 +20,7 @@
       'leaveTime':'Time Out',
       'returnTime':'Time In',
       'mealTime':'Meal Time',
-      'mealPeriodLength':'Meal Len.',
+      'mealPeriodLength':'Meal Length',
       'timestamp':'Time of Submission',
       'comments':'Employee Comments',
       'employeeEmail':'Employee Email'
@@ -104,16 +104,12 @@ function init() {
   // of course, the name tag in the h1 will supply the user name, too in this func
   GLOBAL.submissionDataInit(userID);
 
-console.log('about to make ajax call')
   // ask the datastore for all user records
   $.ajax({
-    url:'http://localhost:3000/collections/requests?user=' + userID,
-    done:showCurrentRequests
+    url:'/collections/users/' + userID + '/requests/',
+    cache:false,
+    success:showCurrentRequests
   })
-  console.log('just made call')
-  // google.script.run
-  //   .withSuccessHandler(showCurrentRequests)
-  //   .getPrivateData(userID);
 }
 
 // Handles uncollapsing meal period section
@@ -208,9 +204,11 @@ function showConfirmationSuccess() {
     $('#confirmSuccess').fadeToggle();
     $rc.children().addClass('bg-warning');
     GLOBAL.resetSubmissionData();
-    // google.script.run
-    //   .withSuccessHandler(showCurrentRequests)
-    //   .getPrivateData($('html').attr('data-id'));
+    $.ajax({
+      url:'/collections/users/' + GLOBAL.submissionData.employeeEmail + '/requests/',
+      cache:false,
+      success:showCurrentRequests
+    })
   });
 }
 
@@ -221,6 +219,13 @@ function submitRequest(e) {
   if ($but.attr('id') === 'confirmOK') $but.attr('id', 'confirmOK_off');
   submitConfirmationGreyOut();
   var submission = GLOBAL.mapSubmissionDataToBackendHeaders();
+  $.ajax({
+    url:'/collections/requests/',
+    type:'POST',
+    data: submission,
+    cache:false,
+    success:showConfirmation
+  })
   // google.script.run
   //   .withFailureHandler(showCurrentRequests)
   //   .withSuccessHandler(showConfirmation)
@@ -613,6 +618,7 @@ function confirm(data) {
   $confirmPanel.find('.displayDataToConfirm').html(display);
   
   data.timestamp = new Date().getTime();
+  data.decision = 'Pending';
 
   // save the data for submission to server on confirmation
   GLOBAL.saveSubmissionData(data);
@@ -621,13 +627,12 @@ function confirm(data) {
 
 // Accepts upcoming request data from server and updates view accordingly.
 function showCurrentRequests(data) {
-  console.log('showCurrentRequests fired.')
-  console.log(JSON.stringify(data))
   var reformatTimes = function(arr) {
-    var stDate = moment(arr[0], 'M/D/YY').format('dddd, MMM Do'),
-        enDate = arr[1] ? moment(arr[1], 'M/D/YY').format('dddd, MMM Do') : null,
-        stTime = arr[2] ? arr[2] : null,
-        enTime = arr[3] ? arr[3] : null,
+    console.log(arr[0])
+    var stDate = moment(arr[0]).format('dddd, MMM Do'),
+        enDate = arr[1] ? moment(arr[1]).format('dddd, MMM Do') : null,
+        stTime = arr[2] ? moment(arr[2]).format('h:mma') : null,
+        enTime = arr[3] ? moment(arr[3]).format('h:mma') : null,
         str = stDate;
     if (enDate) {
       str += stTime ? ', ' + stTime : '';
@@ -644,6 +649,7 @@ function showCurrentRequests(data) {
     return ['Approved','Pending','Waitlisted','Status'].indexOf(row['Status']) > -1;
   });
   if (data.length === 0) {
+    console.log('data has no length: ' + data.length)
     data = '<tr><td>You have no upcoming time off requests.</td></tr>';
   } else {
     data = data.map(function(row) {
@@ -657,7 +663,7 @@ function showCurrentRequests(data) {
       // get headers that we want to display, handle the data specially
       // if Date obj by converting to custom strings
       arr = GLOBAL.upcomingRequestsVisibleHeaders.map(function(header) {
-        return toS(header.key) === '[object String]' ? row[header.key] : reformatTimes(header.key.map(function(k){return row[k];}));
+        return toS(header.key) === '[object String]' ? row[header.key] : reformatTimes(header.key.map(function(k){return parseInt(row[k])}));
       });
 
       // add a cancel button
@@ -667,7 +673,7 @@ function showCurrentRequests(data) {
       // cancel sequence
       arr.push('');
       
-      return {data:arr, id:row['ID'], textClass:textClass};
+      return {data:arr, id:row['_id'], textClass:textClass};
     }); 
   }
   var $table = $('.upcomingRequests table');
@@ -720,6 +726,13 @@ function setFreshCancelHandler() {
         id = $row.attr('data-id');
     $row.find('button:last').remove();
     $cButton.off().attr('disabled','disabled').addClass('disabled').html('Cancelling...');
+    $.ajax({
+      url:'/collections/requests/' + id,
+      type:'PUT',
+      data:{"Status":"Cancelled"},
+      cache:false,
+      success:completeCancel.bind($row[0])
+    })
     // google.script.run
     //   .withSuccessHandler(completeCancel)
 
@@ -749,10 +762,10 @@ function resetCancelHandler() {
 }
 
 // Updates view on successfully cancelling time off
-function completeCancel(success, row) {
-  var $row = $(row),
+function completeCancel(success) {
+  var $row = $(this),
       $table = $row.parents('table');
-  if (success) $(row).remove();
+  if (success.msg === 'success') $row.remove();
   // if there are no more pending
   if ($table.find('tr').length === 1) {
     $table.html('<tr><td>You have no upcoming time off requests.</td></tr>');
