@@ -6,15 +6,22 @@ router.param('collectionName', function (req, res, next, collectionName) {
     return next()
  })
 
-router.get('/:collectionName', function (req, res, next) {
-console.log('collection, typeof: ' + typeof req.collection)
-  req.collection.find({}, {limit:10, sort: {'_id':-1}}).toArray(function (e, results) {
-  	if (e) return next (e)
-  	res.send(results)
+router.get('/users/:id/requests', function (req, res, next) {
+  req.collection = req.db.collection('requests')
+  req.collection.find({"Employee Email":req.params.id}).toArray(function (e, results) {
+    if (e) return next (e)
+    res.send(results)
   })
 })
+
+router.get('/:collectionName', function (req, res, next) {
+  req.collection.find({}, {sort: {'_id':-1}}).toArray(function (e, results) {
+    if (e) return next (e)
+    res.send(results)
+  })
+})
+
 router.post('/:collectionName', function (req, res, next) {
-	console.log('something was posted. body: ' + req.body)
 	req.collection.insert(req.body, {}, function (e, results) {
 		if (e) return next (e)
 		res.send(results)
@@ -24,8 +31,8 @@ router.post('/:collectionName', function (req, res, next) {
 router.get('/:collectionName/:id', function (req, res, next) {
   console.log('route called')
   req.collection.findById(req.params.id, function (e, result) {
-  	if (e) return next (e)
-  	res.send(result)
+    if (e) return next (e)
+    res.send(result)
   })
 })
 
