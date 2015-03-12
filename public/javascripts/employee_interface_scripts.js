@@ -97,6 +97,7 @@ function init() {
   $('html').on('hidden.bs.collapse', '#meal-period-section', resetBlanks);
   $('html').on('show.bs.collapse', '#meal-period-section', function(e){e.stopPropagation();});
   $('html').on('hidden.bs.collapse', '#partial-shift', resetBlanks);
+  $('html').on('click', '#changeName', editName);
   
   // a data-id attribute was seemingly the best way to pass user id data to the client
   var userID = $('html').attr('data-id');
@@ -110,6 +111,20 @@ function init() {
     cache:false,
     success:showCurrentRequests
   })
+}
+
+// Handles changing user's name
+function editName() {
+  var button$ = $(this),
+      name$ = button$.prev().find('span'),
+      name = name$.html().trim(),
+      form = '<form class="form-inline"><input class="form-control" placeholder="' + name + '"></form>'
+
+  button$.off().attr('value', 'Submit')
+  name$.html('').append(form)
+
+  button$.on('click', changeName)
+
 }
 
 // Handles uncollapsing meal period section
@@ -628,7 +643,6 @@ function confirm(data) {
 // Accepts upcoming request data from server and updates view accordingly.
 function showCurrentRequests(data) {
   var reformatTimes = function(arr) {
-    console.log(arr[0])
     var stDate = moment(arr[0]).format('dddd, MMM Do'),
         enDate = arr[1] ? moment(arr[1]).format('dddd, MMM Do') : null,
         stTime = arr[2] ? moment(arr[2]).format('h:mma') : null,
