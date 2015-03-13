@@ -1,15 +1,18 @@
 .page-header
-  h1 Time Off Requests 
-    small Hello, 
-      span USERNAME
-    input#editName(
-      class='btn btn-default btn-xs'
-      type='button'
-      data-toggle='modal'
-      data-target='#nameChangeModal'
-      value='Change name'
-    )
-  #nameChangeModal(
+  .row
+    .col-md-10
+      h1 Time Off Requests 
+        small Hello, 
+          span.displayUserName
+    .col-md-2
+      input#editName(
+        class='btn btn-default'
+        type='button'
+        data-toggle='modal'
+        data-target='#userChangeModal'
+        value='Change user'
+      )
+  #userChangeModal(
     class="modal fade"
     tabindex="-1"
     role="dialog"
@@ -25,27 +28,33 @@
             aria-label="Close"
           )
             span(aria-hidden="true")&times;
-          h4.modal-title(id="myModalLabel") Change name
+          h4.modal-title(id="myModalLabel") Set user info
         .modal-body
-          form.form-inline
-            input.form-control(placeholder="name")
+          form.form
+            .form-group
+              label.control-label(for="nameChangeInput") Name
+              input.form-control#nameChangeInput(placeholder="name")
+            .form-group
+              label.control-label(for="emailChangeInput") Email
+              input.form-control#emailChangeInput(placeholder="email")
+
         .modal-footer
             button(type="button", class="btn btn-default" data-dismiss="modal") Cancel
-            button(type="button", class="btn btn-primary") Submit
+            button#userChangeSubmit(type="button", class="btn btn-primary") Submit
 div(id="mainView") 
   .row
     .col-md-12
-      div(class="panel panel-primary", id="request-form") 
+      #request-form(class="panel panel-primary") 
         .panel-heading
           h2(class="panel-title") Time Off Request Form
         .panel-body
           .requestForm
-            form(class="form-inline", role="form") 
+            form.form-inline(role="form") 
               .row
                 .col-md-12
                   .form-group
-                    label(class="control-label") Type of Leave:
-                    select(class="leaveType form-control", id="leaveType") 
+                    label.control-label Type of Leave:
+                    select#leaveType(class="leaveType form-control") 
                       option(value="Please choose:") Please choose:
                       option(value="Vacation") Vacation
                       option(value="Holiday") Holiday
@@ -126,7 +135,8 @@ div(id="mainView")
     .col-md-12
       div(class="upcomingRequests panel panel-info") 
         .panel-heading
-          h2(class="panel-title") Upcoming requests for USERNAME
+          h2(class="panel-title") Upcoming requests for 
+            span.displayUserName
         table(class="table") 
           tbody
             tr

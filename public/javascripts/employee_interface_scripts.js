@@ -6,14 +6,14 @@
     upcomingRequestsVisibleHeaders: [
       { key:'Type of Leave', title: 'Type of Leave' },
       { key:['Begin Date', 'End Date', 'Time Out', 'Time In'], title: 'Date(s)'},
-      { key:'Employee Comments', title: 'Comments' },
+      { key:'User Comments', title: 'Comments' },
       { key:'Status', title: 'Status' }
     ],
 
     // Translator for labels on the server
     backendHeaderMap: {
       'decision':'Status',
-      'employeeName':'Employee',
+      'userName':'User',
       'leaveType':'Type of Leave',
       'startDate':'Begin Date',
       'endDate':'End Date',
@@ -22,8 +22,8 @@
       'mealTime':'Meal Time',
       'mealPeriodLength':'Meal Length',
       'timestamp':'Time of Submission',
-      'comments':'Employee Comments',
-      'employeeEmail':'Employee Email'
+      'comments':'User Comments',
+      'userEmail':'User Email'
     },
 
     submissionData: {},
@@ -43,18 +43,18 @@
       return this.submissionData;
     },
 
-    // Delete all props on the submission data obj except for employee data
+    // Delete all props on the submission data obj except for user data
     resetSubmissionData: function() {
       for (var key in this.submissionData) {
-        if (key === 'employeeEmail' || key === 'employeeName') continue;
+        if (key === 'userEmail' || key === 'userName') continue;
         delete this.submissionData[key];
       }
     },
 
-    // Setup submission data object with employee data
+    // Setup submission data object with user data
     submissionDataInit: function(userID) {
-      this.setSubmissionDataProp('employeeEmail',userID);
-      this.setSubmissionDataProp('employeeName',$('h1 small').text().replace('Hello, ', '').trim());
+      this.setSubmissionDataProp('userEmail',userID);
+      this.setSubmissionDataProp('userName',$('h1 span').text().trim());
     },
 
     // return a submission data object with server-friendly headers to send off
@@ -97,7 +97,8 @@ function init() {
   $('html').on('hidden.bs.collapse', '#meal-period-section', resetBlanks);
   $('html').on('show.bs.collapse', '#meal-period-section', function(e){e.stopPropagation();});
   $('html').on('hidden.bs.collapse', '#partial-shift', resetBlanks);
-  $('html').on('click', '#changeName', editName);
+  $('html').on('nameChange', resetPage);
+  $('#userChangeModal').on('click', '#userChangeSubmit', changeUser);
   
   // a data-id attribute was seemingly the best way to pass user id data to the client
   var userID = $('html').attr('data-id');
@@ -106,25 +107,53 @@ function init() {
   GLOBAL.submissionDataInit(userID);
 
   // ask the datastore for all user records
+  resetUpcomingRequests(userID)
+
+  $('#userChangeModal').modal('show')
+}
+
+// Reset upcoming requests
+function resetUpcomingRequests(id) {
   $.ajax({
-    url:'/collections/users/' + userID + '/requests/',
+    url:'/collections/users/' + id + '/requests/',
     cache:false,
     success:showCurrentRequests
   })
 }
 
+function setDisplayName(name) {
+  $('span.displayUserName').html(name)
+}
+
+// Reset page in event of name change
+function resetPage() {
+  clearForm()
+  var data = GLOBAL.getSubmissionData(),
+      name = data.userName,
+      email = data.userEmail
+  setDisplayName(name)
+  resetUpcomingRequests(email)
+  console.log('resetpage')
+}
+
 // Handles changing user's name
-function editName() {
-  var button$ = $(this),
-      name$ = button$.prev().find('span'),
-      name = name$.html().trim(),
-      form = '<form class="form-inline"><input class="form-control" placeholder="' + name + '"></form>'
+function changeUser() {
+  var modal$ = $(this).parents('#userChangeModal'),
+      name$ = modal$.find('#nameChangeInput'),
+      email$ = modal$.find('#emailChangeInput'),
+      name = name$.val().trim(),
+      email = email$.val().trim(),
+      currentUserEmail = GLOBAL.getSubmissionData().userEmail
 
-  button$.off().attr('value', 'Submit')
-  name$.html('').append(form)
-
-  button$.on('click', changeName)
-
+  if (!name || !email || currentUserEmail === email) {
+    name$.val('')
+    email$.val('')
+  } else {
+    GLOBAL.setSubmissionDataProp('userEmail',email)
+    GLOBAL.setSubmissionDataProp('userName',name)
+    $('html').trigger('nameChange')
+  }
+  return modal$.modal('hide')
 }
 
 // Handles uncollapsing meal period section
@@ -220,7 +249,7 @@ function showConfirmationSuccess() {
     $rc.children().addClass('bg-warning');
     GLOBAL.resetSubmissionData();
     $.ajax({
-      url:'/collections/users/' + GLOBAL.submissionData.employeeEmail + '/requests/',
+      url:'/collections/users/' + GLOBAL.submissionData.userEmail + '/requests/',
       cache:false,
       success:showCurrentRequests
     })
@@ -661,11 +690,15 @@ function showCurrentRequests(data) {
   headerNames = GLOBAL.upcomingRequestsVisibleHeaders.map(function(header){ return header.title}).concat('','');
   data = data.filter(function(row){
     return ['Approved','Pending','Waitlisted','Status'].indexOf(row['Status']) > -1;
-  });
+  }),
+  name;
   if (data.length === 0) {
     console.log('data has no length: ' + data.length)
     data = '<tr><td>You have no upcoming time off requests.</td></tr>';
   } else {
+    name = data[0]['User']
+    setDisplayName(name)
+    GLOBAL.setSubmissionDataProp('userName', name)
     data = data.map(function(row) {
 
       // Set formatting of Status
