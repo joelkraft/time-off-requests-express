@@ -6,4 +6,8 @@ router.get('/', function(req, res) {
   res.render('index', { isSupervisor: false });
 });
 
+router.get('/supervisor', function(req, res) {
+  res.render('index', { isSupervisor: true })
+})
+
 module.exports = router;

@@ -1,6 +1,6 @@
 .page-header
   .row
-    .col-md-10
+    .col-md-8
       h1 Time Off Requests 
         small Hello, 
           span.displayUserName
@@ -12,6 +12,12 @@
         data-target='#userChangeModal'
         value='Change user'
       )
+    .col-md-2
+      a(
+        href='/supervisor'
+        class='btn btn-info active'
+        role='button'
+      ) Supervisor Interface
   #userChangeModal(
     class="modal fade"
     tabindex="-1"
