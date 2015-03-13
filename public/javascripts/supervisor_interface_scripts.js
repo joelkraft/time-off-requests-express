@@ -1,7 +1,7 @@
   $(function() {
 
     // Instantiate controller
-    var controller = new Controller();
+   var controller = new Controller();
 
     // As opposed to adding multiple listeners, it was decided to use a switch to
     // respond to different events with one listener. Probably could be done more
@@ -64,6 +64,11 @@ function logObj(s) {
   
   // Call to server for all data in the datastore
   Model.prototype.getAllRequestsFromServer = function() { // Does this need to be set as a listener from Controller?
+    $.ajax({
+      url:'/collections/requests/',
+      cache:false,
+      success:this.processServerData.bind(this)
+    })
     // google.script.run
     //   .withSuccessHandler(this.processServerData.bind(this))
     //   .getAllRequests();      
@@ -72,29 +77,14 @@ function logObj(s) {
   // receives data from server, turns each row into documents,
   // stores them in the data object (on the Model), fires modelInitialized when done.
   Model.prototype.processServerData = function(data) {
-  data = JSON.parse(data);
-    
-    // cache all users from the schedules in allUserInfo
-    this.allUserInfo = data.allUserInfo;
-    
-    // here are all the request records
-    data = data.vals;
-
-    // the data comes with the headers at the top.  This maps them so they can be called by name
-    this.headerOrder = data.shift();
-
     // save the data array to preserve its order (for output on the display)
     this.rawData = data;
     var obj = {},
         self = this;
        
     // store each record under its ID for querying, and make header names the properties for retrieving values.
-    data.forEach(function(row,i) {
-      var o = {};
-      row.forEach(function(col, ind) {
-        o[self.headerOrder[ind]] = col;
-      });
-      obj[o['ID']] = o;
+    data.forEach(function(item,i) {
+      obj[item['_id']] = item;
     });
     $.extend(true, this.data, obj);
     this.notifyListeners('modelInitialized', this.data);
@@ -186,9 +176,16 @@ function logObj(s) {
     this.deptSwitchState = 'all';
   };
   
+  Controller.prototype.prettyDate = function(ms,type) {
+    ms = parseInt(ms)
+    if (type === 'datetime') return moment(ms).format('MM/DD/YYYY')
+    else if (type === 'time') return moment(ms).format('MM/DD/YYYY h:mm:ssa')
+  }
+
   // Once we have a complete model, this method initiates the controller
   Controller.prototype.init = function(model) {
 
+    this_ = this
     // Create colgroup html string from the widths in colWidths based on the length of mainDisplayHeaders
     this.colgroup$ = $('<colgroup>' + model.mainDisplayHeaders.map(function(e,i) {
         return '<col style="width:' + this.colWidths[i] + 'px">';
@@ -206,23 +203,25 @@ function logObj(s) {
     var h = model.headerOrder;
 
     // Build table body html string from rawData array
-    model.rawData.forEach(function(row,i) {
-      var id = row[h.indexOf('ID')],
+    model.rawData.forEach(function(request,i) {
+      var id = request['_id'],
           this_ = this,
           tableRow = model.mainDisplayHeaders.reduce(function(prev, cur, i) {
-            var contents = row[h.indexOf(cur)];
+            var contents = request[cur] || '';
 
             // Truncate employee comment in main view if too long
             if (cur === 'Employee Comments' && contents.length > 36) {
-              console.log('long employee comment found.');
               contents = contents.replace('\n', ' ').substr(0,36).trim() + '...';
             }
-            return prev + '<td>' + (i === h.indexOf('Status') ? this_.xsButton(contents) : contents) + '</td>';
+
+            if (cur.indexOf('Date') > -1) contents = this_.prettyDate(contents, 'datetime')
+            else if (cur.indexOf('Time') > -1) contents = this_.prettyDate(contents, 'time')
+            return prev + '<td>' + (cur === 'Status' ? this_.xsButton(contents) : contents) + '</td>';
           }, ''),
-          employeeId = row[h.indexOf('Employee Email')],
-          userInfo = model.allUserInfo[employeeId],
-          dept = ((userInfo && userInfo.dept) || ''),
-          row$ = $('<tr data-id="' + id + '" data-dept="' + dept + '">' + tableRow + '</tr>'),
+          employeeId = request['Employee Email'],
+          // userInfo = model.allUserInfo[employeeId],
+          // dept = ((userInfo && userInfo.dept) || ''),
+          row$ = $('<tr data-id="' + id + /*'" data-dept="' + dept +*/ '">' + tableRow + '</tr>'),
           tds = [];
 
       // Store a reference to this row on Controller under the record's ID.

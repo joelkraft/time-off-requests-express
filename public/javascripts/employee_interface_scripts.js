@@ -6,14 +6,14 @@
     upcomingRequestsVisibleHeaders: [
       { key:'Type of Leave', title: 'Type of Leave' },
       { key:['Begin Date', 'End Date', 'Time Out', 'Time In'], title: 'Date(s)'},
-      { key:'User Comments', title: 'Comments' },
+      { key:'Employee Comments', title: 'Comments' },
       { key:'Status', title: 'Status' }
     ],
 
     // Translator for labels on the server
     backendHeaderMap: {
       'decision':'Status',
-      'userName':'User',
+      'employeeName':'Employee',
       'leaveType':'Type of Leave',
       'startDate':'Begin Date',
       'endDate':'End Date',
@@ -22,8 +22,8 @@
       'mealTime':'Meal Time',
       'mealPeriodLength':'Meal Length',
       'timestamp':'Time of Submission',
-      'comments':'User Comments',
-      'userEmail':'User Email'
+      'comments':'Employee Comments',
+      'employeeEmail':'Employee Email'
     },
 
     submissionData: {},
@@ -46,15 +46,15 @@
     // Delete all props on the submission data obj except for user data
     resetSubmissionData: function() {
       for (var key in this.submissionData) {
-        if (key === 'userEmail' || key === 'userName') continue;
+        if (key === 'employeeEmail' || key === 'employeeName') continue;
         delete this.submissionData[key];
       }
     },
 
     // Setup submission data object with user data
     submissionDataInit: function(userID) {
-      this.setSubmissionDataProp('userEmail',userID);
-      this.setSubmissionDataProp('userName',$('h1 span').text().trim());
+      this.setSubmissionDataProp('employeeEmail',userID);
+      this.setSubmissionDataProp('employeeName',$('h1 span').text().trim());
     },
 
     // return a submission data object with server-friendly headers to send off
@@ -122,15 +122,15 @@ function resetUpcomingRequests(id) {
 }
 
 function setDisplayName(name) {
-  $('span.displayUserName').html(name)
+  $('span.displayEmployeeName').html(name)
 }
 
 // Reset page in event of name change
 function resetPage() {
   clearForm()
   var data = GLOBAL.getSubmissionData(),
-      name = data.userName,
-      email = data.userEmail
+      name = data.employeeName,
+      email = data.employeeEmail
   setDisplayName(name)
   resetUpcomingRequests(email)
   console.log('resetpage')
@@ -143,14 +143,14 @@ function changeUser() {
       email$ = modal$.find('#emailChangeInput'),
       name = name$.val().trim(),
       email = email$.val().trim(),
-      currentUserEmail = GLOBAL.getSubmissionData().userEmail
+      currentUserEmail = GLOBAL.getSubmissionData().employeeEmail
 
   if (!name || !email || currentUserEmail === email) {
     name$.val('')
     email$.val('')
   } else {
-    GLOBAL.setSubmissionDataProp('userEmail',email)
-    GLOBAL.setSubmissionDataProp('userName',name)
+    GLOBAL.setSubmissionDataProp('employeeEmail',email)
+    GLOBAL.setSubmissionDataProp('employeeName',name)
     $('html').trigger('nameChange')
   }
   return modal$.modal('hide')
@@ -249,7 +249,7 @@ function showConfirmationSuccess() {
     $rc.children().addClass('bg-warning');
     GLOBAL.resetSubmissionData();
     $.ajax({
-      url:'/collections/users/' + GLOBAL.submissionData.userEmail + '/requests/',
+      url:'/collections/users/' + GLOBAL.submissionData.employeeEmail + '/requests/',
       cache:false,
       success:showCurrentRequests
     })
@@ -696,9 +696,9 @@ function showCurrentRequests(data) {
     console.log('data has no length: ' + data.length)
     data = '<tr><td>You have no upcoming time off requests.</td></tr>';
   } else {
-    name = data[0]['User']
+    name = data[0]['Employee']
     setDisplayName(name)
-    GLOBAL.setSubmissionDataProp('userName', name)
+    GLOBAL.setSubmissionDataProp('employeeName', name)
     data = data.map(function(row) {
 
       // Set formatting of Status

@@ -54,18 +54,10 @@
     .col-md-2
   .page-header
     .row
-      .col-md-8
+      .col-md-10
         h1 Time Off Request Management 
           small Hello, 
             span.displayUserName USERNAME
-      .col-md-2
-        input#editName(
-          class='btn btn-default'
-          type='button'
-          data-toggle='modal'
-          data-target='#userChangeModal'
-          value='Change user'
-        )
       .col-md-2
         a(
           href='/'
@@ -132,5 +124,6 @@
         table(id='requestsHeader')
         div(id='requestsBody')
           table
-            .panel-body Loading Requests...
+            tr 
+              td(style="border:none;") Loading Requests...
           div(id='requestsBodySpacer')
