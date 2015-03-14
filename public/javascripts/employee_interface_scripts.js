@@ -133,7 +133,6 @@ function resetPage() {
       email = data.employeeEmail
   setDisplayName(name)
   resetUpcomingRequests(email)
-  console.log('resetpage')
 }
 
 // Handles changing user's name
@@ -693,7 +692,6 @@ function showCurrentRequests(data) {
   }),
   name;
   if (data.length === 0) {
-    console.log('data has no length: ' + data.length)
     data = '<tr><td>You have no upcoming time off requests.</td></tr>';
   } else {
     name = data[0]['Employee']

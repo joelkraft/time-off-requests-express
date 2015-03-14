@@ -176,10 +176,9 @@ function logObj(s) {
     this.deptSwitchState = 'all';
   };
   
-  Controller.prototype.prettyDate = function(ms,type) {
+  Controller.prototype.prettyDate = function(ms,formatString) {
     ms = parseInt(ms)
-    if (type === 'datetime') return moment(ms).format('MM/DD/YYYY')
-    else if (type === 'time') return moment(ms).format('MM/DD/YYYY h:mm:ssa')
+    return moment(ms).format(formatString)
   }
 
   // Once we have a complete model, this method initiates the controller
@@ -214,8 +213,8 @@ function logObj(s) {
               contents = contents.replace('\n', ' ').substr(0,36).trim() + '...';
             }
 
-            if (cur.indexOf('Date') > -1) contents = this_.prettyDate(contents, 'datetime')
-            else if (cur.indexOf('Time') > -1) contents = this_.prettyDate(contents, 'time')
+            if (cur.indexOf('Date') > -1) contents = this_.prettyDate(contents, 'MM/DD/YYYY')
+            else if (cur.indexOf('Time') > -1) contents = this_.prettyDate(contents, 'MM/DD/YYYY h:mm:ss a')
             return prev + '<td>' + (cur === 'Status' ? this_.xsButton(contents) : contents) + '</td>';
           }, ''),
           employeeId = request['Employee Email'],
@@ -285,7 +284,7 @@ function logObj(s) {
     //m$.prepend('<li><a href="#">' + but$.text().trim() + '</a></li>');
     but$.html(but$.html().replace(but$.text(), choice + ' '));
     //choice$.parent().remove();
-    // handle putting off and putting on handlers                         ////////*****************/////////////***************////////////
+    // handle putting off and putting on handlers
     switch (choice) {
       case 'Holiday':
         break;
@@ -296,7 +295,7 @@ function logObj(s) {
   
   // Shows the decision panel when a request is selected for review
   Controller.prototype.showDecisionPanel = function showDecisionPanel(e) {
-    var id = +$(e.target).parents('tr').attr('data-id'),        
+    var id = $(e.target).parents('tr').attr('data-id'),        
         panel$ = this.decisionPanel,
         detailsPanel$ = panel$.find('#detailsPanel'),
         name$ = panel$.find('.employeeName'),
@@ -304,8 +303,6 @@ function logObj(s) {
         buttons$ = panel$.find('#decisionSwitches label'),
         this_ = this;
     
-    console.log('\nwindow height: ' + $(window).height() + '\nscreen height: ' + this.screen.height());
-
     // darken background, also prevent user interaction when decision panel is in focus
     this.screen.show();
 
@@ -411,10 +408,17 @@ function logObj(s) {
     // google.script.run
     //   .withSuccessHandler($.proxy(this.submitSuccess, this))
     //   .writeDecisionToSpreadsheetAndNotifyEmployee(decisionData);
+    $.ajax({
+      url:'/collections/requests/' + st.id,
+      cache:false,
+      type:'PUT',
+      data:{'Status':st.status, 'Supervisor Comments': st.comments},
+      success:$.proxy(this.submitSuccess, this, st)
+    })
   };
   
   // Updates the view if the server returns successfully.
-  Controller.prototype.submitSuccess = function(decision) {
+  Controller.prototype.submitSuccess = function(decision, success) {
 
     // Use momentjs to format the date and time of the submission
     model.commitStatus(moment(decision.time).format('M/D/YYYY hh:mm a'));
@@ -427,9 +431,9 @@ function logObj(s) {
 
     //update view, show confirmation panel..
     var tds = this[decision.id].find('td'),
-        findIndex = function(header) { return model.headerOrder.indexOf(header)};
+        findIndex = function(header) { return model.mainDisplayHeaders.indexOf(header)};
 
-    // Providing a function to .removeClass() allows us to keep 'btn-xs' class
+
     $(tds[findIndex('Status')])
       .find('button')
       .removeClass(function(i,cl) {
@@ -437,9 +441,8 @@ function logObj(s) {
         if (matches.indexOf('btn-xs') > -1) matches.splice(matches.indexOf('btn-xs'),1);
         return matches.join(' ');
       })
-      .addClass(this.setStatusState(decision.decision))
-      .html(decision.decision);
-
+      .addClass(this.setStatusState(decision.status))
+      .html(decision.status);
     // write the comments and time into the row
     $(tds[findIndex('Supervisor Comments')]).html(decision.comments);
     $(tds[findIndex('Decision Time')]).html(moment(decision.time).format('M/D/YYYY h:mm a'));
@@ -471,7 +474,15 @@ function logObj(s) {
   
   // helper method for tabulateDetails to provide content for each table row
   Controller.prototype.formatData = function formatData(key, value) {
-    var statusID = key === 'Status' ? ' id="decisionPanelInfoTableRequestStatus"' : '';
+    var statusID = key === 'Status' ? ' id="decisionPanelInfoTableRequestStatus"' : '',
+        pd = this.prettyDate;
+    if ({'Time of Submission':true, 'Decision Time':true,'Cancellation Time':true}[key]) {
+      value = pd(value, 'MM/DD/YYYY h:mm:ss a')
+    } else if (key.indexOf('Time') > -1) {
+      value = pd(value, 'h:mma')
+    } else if (key.indexOf('Date') > -1) {
+      value = pd(value, 'MM/DD/YYYY')
+    }
     return '<td><b>' + key + '</b></td>' +
            '<td' + statusID + '>' + value + '</td>';
   };

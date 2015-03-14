@@ -8,7 +8,7 @@ router.param('collectionName', function (req, res, next, collectionName) {
 
 router.get('/users/:id/requests', function (req, res, next) {
   req.collection = req.db.collection('requests')
-  req.collection.find({"User Email":req.params.id}).toArray(function (e, results) {
+  req.collection.find({"Employee Email":req.params.id}).toArray(function (e, results) {
     if (e) return next (e)
     res.send(results)
   })
