@@ -114,6 +114,7 @@ function init() {
 
 // Reset upcoming requests
 function resetUpcomingRequests(id) {
+  console.log(id)
   $.ajax({
     url:'/collections/users/' + id + '/requests/',
     cache:false,
@@ -687,17 +688,20 @@ function showCurrentRequests(data) {
     return str;
   },
   headerNames = GLOBAL.upcomingRequestsVisibleHeaders.map(function(header){ return header.title}).concat('','');
-  data = data.filter(function(row){
+  filteredData = data.filter(function(row){
     return ['Approved','Pending','Waitlisted','Status'].indexOf(row['Status']) > -1;
   }),
   name;
-  if (data.length === 0) {
-    data = '<tr><td>You have no upcoming time off requests.</td></tr>';
-  } else {
+  if (data.length > 0) {
     name = data[0]['Employee']
     setDisplayName(name)
     GLOBAL.setSubmissionDataProp('employeeName', name)
-    data = data.map(function(row) {
+  }
+
+  if (filteredData.length === 0) {
+    filteredData = '<tr><td>You have no upcoming time off requests.</td></tr>';
+  } else {
+    filteredData = filteredData.map(function(row) {
 
       // Set formatting of Status
       var textClass = {Approved:'text',Pending:'text-muted',Waitlisted:'text-muted'}[row['Status']],
@@ -726,20 +730,20 @@ function showCurrentRequests(data) {
       tag;
 
   // data will not be an array if there are no requests to display
-  if (toS(data) === '[object Array]') {
+  if (toS(filteredData) === '[object Array]') {
 
     // build html table
-    data.unshift({data:headerNames});
-    for (var i = 0; i < data.length; i++) {
-      tableGuts += '<tr data-id="' + data[i].id + '" class="' + data[i].textClass + '">';
-        for (var j = 0; j < data[i].data.length; j++) {
+    filteredData.unshift({data:headerNames});
+    for (var i = 0; i < filteredData.length; i++) {
+      tableGuts += '<tr data-id="' + filteredData[i].id + '" class="' + filteredData[i].textClass + '">';
+        for (var j = 0; j < filteredData[i].data.length; j++) {
           tag = i === 0 ? 'h' : 'd';
-          tableGuts += '<t' + tag + '>' + data[i].data[j] + '</t' + tag + '>';
+          tableGuts += '<t' + tag + '>' + filteredData[i].data[j] + '</t' + tag + '>';
         }
       tableGuts += '</tr>';
     }
   } else {
-    $table.html(data);
+    $table.html(filteredData);
     return;
   }
   $table.html(tableGuts);
