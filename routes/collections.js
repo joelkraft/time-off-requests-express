@@ -14,6 +14,22 @@ router.get('/users/:id/requests', function (req, res, next) {
   })
 })
 
+router.get('/users', function (req, res, next) {
+  req.collection = req.db.collection('requests')
+  req.collection.find({}).toArray(function (e, results) {
+    if (e) return next (e)
+    var saved = []
+    res.send(results.filter(function(record){
+      if (this.indexOf(record['Employee Email']) === -1) {
+        saved.push(record['Employee Email'])
+        return true
+      } else { return false }
+    }, saved).map(function(record){
+      return {name: record['Employee'], email: record['Employee Email']}
+    }))
+  })
+})
+
 router.get('/:collectionName', function (req, res, next) {
   req.collection.find({}, {sort: {'_id':-1}}).toArray(function (e, results) {
     if (e) return next (e)
