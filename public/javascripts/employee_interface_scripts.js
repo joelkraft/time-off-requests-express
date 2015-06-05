@@ -109,12 +109,59 @@ function init() {
   // ask the datastore for all user records
   resetUpcomingRequests(userID)
 
+  showModal()
+}
+
+// Show Modal, find out if there are existing logins
+function showModal() {
+  $.ajax({
+    url:'/collections/users/',
+    cache: false,
+    success: showExistingLogins
+  })
   $('#userChangeModal').modal('show')
+}
+
+function showExistingLogins(logins) {
+  if (logins.length === 0) return
+  logins = logins.reduce(function(obj,login){
+    obj[login['email']] = login['name']
+    return obj
+  },{origArray:logins})
+  var $nameBlank = $('#nameChangeInputNoMenu'),
+      $formGroup = $nameBlank.parent(),
+      buttonText = '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ' +
+                   'aria-expanded="false"> Recent <span class="caret"></span></button>',
+      ddList = '<ul class="dropdown-menu dropdown-menu-right" role="menu">' +
+               logins.origArray.reduce(function(txt, userData) {
+                 return txt + '<li><a href="#" data-email-id="' + userData.email + '">' + userData.name + '</a></li>'
+               }, '') +
+               '</ul>'
+      $dd = $('<div></div>')
+  $nameBlank.detach()
+  $dd.addClass('input-group-btn')
+    .append(buttonText)
+    .append(ddList)
+  $('<div class="input-group"></div>')
+    .append($nameBlank)
+    .append($dd)
+    .appendTo($formGroup)
+  setUsernameMenuHandler($dd)
+}
+
+function setUsernameMenuHandler($div) {
+  var $nameBlank = $('#nameChangeInputNoMenu'),
+      $emailBlank = $('#emailChangeInput')
+
+  $div.on('click', 'a', function() {
+    $a = $(this)
+    $nameBlank.val($a.html())
+    $emailBlank.val($a.attr('data-email-id'))
+  })
 }
 
 // Reset upcoming requests
 function resetUpcomingRequests(id) {
-  console.log(id)
   $.ajax({
     url:'/collections/users/' + id + '/requests/',
     cache:false,
@@ -124,6 +171,36 @@ function resetUpcomingRequests(id) {
 
 function setDisplayName(name) {
   $('span.displayEmployeeName').html(name)
+}
+
+function lookForRecentNames() {
+  $.ajax({
+    url:'/collections/users',
+    cache: false,
+    success: setRecentNameMenu
+  })
+}
+function setRecentNameMenu(data) {
+  if (data.length === 0) return
+  var menuHtml =  '<div class="input-group">' +
+                    '<input class="form-control" id="nameChangeInput" type="text" aria-label="...">' +
+                    '<div class="input-group-btn">' +
+                      '<button type="button" class="btn btn-default dropdown-toggle"' +
+                        'data-toggle="dropdown" aria-expanded="false">&nbsp;' +
+                        '<span>caret</span>' +
+                      '</button>' +
+                      '<ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>' +
+                    '</div>' +
+                  '</div>',
+      menu$ = $(menuHtml),
+      menuUl$ = menu$.find('ul'),
+      nameChangeInputNoMenu$ = $('#nameChangeInputNoMenu')
+
+                // li
+                //   a(href="#") Action
+                // li
+                //   a(href="#") Another action
+
 }
 
 // Reset page in event of name change
@@ -139,7 +216,7 @@ function resetPage() {
 // Handles changing user's name
 function changeUser() {
   var modal$ = $(this).parents('#userChangeModal'),
-      name$ = modal$.find('#nameChangeInput'),
+      name$ = modal$.find('#nameChangeInputNoMenu'),
       email$ = modal$.find('#emailChangeInput'),
       name = name$.val().trim(),
       email = email$.val().trim(),
