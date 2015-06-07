@@ -42,7 +42,9 @@
     SI.on('click', '#submitDecision', $.proxy(controller.initiateSubmit, controller));
     //SI.on('submitClicked', '#decisionPanel', $.proxy(controller.testitout, controller));
     SI.on('submitClicked', '#decisionPanel', $.proxy(controller.toggleSubmitActiveState, controller));
-    SI.on('allRowsLoaded', $.proxy($.fn.filters, SI));
+    // SI.on('allRowsLoaded', $.proxy($.fn.filters, SI));
+    SI.on('keyup', '#search-bar', $.proxy(controller.searchFilter, controller))
+    SI.on('filter.adjustSpacer', $.proxy(controller.adjustSpacer, controller))
   });
 
 // Convenience function to help when debugging.
@@ -171,9 +173,15 @@ function logObj(s) {
 
     this.decisionPanel = $('#decisionPanel');
     this.submitLock = false;
-    this.decisionPanelComments = {p:this.decisionPanel.find('.commentsBox p'), textarea: this.decisionPanel.find('.commentsBox textarea')};
+    this.decisionPanelComments = {
+             p:this.decisionPanel.find('.commentsBox p'), 
+      textarea:this.decisionPanel.find('.commentsBox textarea')
+    };
     this.submitButton = $('#submitDecision');
     this.deptSwitchState = 'all';
+
+    // Reference to spacer under requests that covers yellow background when
+    this.bottomSpacer = $('#requestsBodySpacer')
   };
   
   Controller.prototype.prettyDate = function(ms,formatString) {
@@ -507,11 +515,44 @@ function logObj(s) {
         ];
   };
 
+  Controller.prototype.searchFilter = function(e) {
+    var ssVal = $(e.target).val(),
+        rows = $('#requestsBody').find('tr')
+
+    rows.each(function(i, row) {
+      row = $(row)
+      if (row.find('td:gt(0)').filter(':Contains(' + ssVal + ')').length === 0) {
+        row.hide()
+      } else {
+        row.show()
+      }
+    });
+    this.supervisorInterface$.trigger('filter.adjustSpacer')
+  }
+
+  // This handler adjusts the spacer to cover up the yellow backing of the table, if 
+  // the list of filtered results gets too small. (The yellow backing is what gives
+  // hilighting to a line after a decision has been committed.)
+  Controller.prototype.adjustSpacer = function(e) {
+    var spacer = this.bottomSpacer.height(),
+        viewport = this.requestsBody.height(),
+        table = this.tableBody$.height(),
+        finalHeader = $('#requestsHeader th:last-child');
+    if (table < viewport) {
+      this.bottomSpacer.css('height', viewport - table);
+      $('#requestsBody').css('max-width', 1133);
+    } else {
+      this.bottomSpacer.css('height', 0);
+      $('#requestsBody').css('max-width', 1150);
+    }
+  }
+
   // Instantiate controller and hang it onto the global object.
   exports.Controller = Controller;
   
 })(window);
- 
+
+/*** This was a plug-in for multiple selectable filters, may reinstate in future *** 
   // plug-in for jQuery to handle the buttons that filter the view
   // the basic pattern for this came from JavaScript Web Applications,
   // by Alex Maccaw, though it has been heavily modified.
@@ -676,6 +717,7 @@ function logObj(s) {
     element.trigger('filter.adjustSpacer');
     return this;
   }
+*/
 
   // This makes the search case insensitive.  See this link:
   // http://stackoverflow.com/questions/2196641/how-do-i-make-jquery-contains-case-insensitive-including-jquery-1-8
@@ -693,59 +735,6 @@ function logObj(s) {
 //    cell.html('<input type="text" value="' + text + '">');
     
   }
-
-/*
-  function placeRequestsOnPage(data) {
-  var tableBody$ = $('#requestsBody table'),
-      tableHead$ = $('#requestsHeader'),
-      colWidths = [120,140,126,91,80,80,80,90,68,182,227,161,205,171,210,191,150],
-      applyLabel = function(text) {
-        var span = function(label){return '<button class="btn btn-xs btn-' + label + '">' + text + '</button>'},
-            html;
-        switch(text) {
-          case 'Approved':
-            return span('success');
-            break;
-          case 'Denied':
-            return span('danger');
-            break;
-          case 'Pending':
-            return span('info');
-            break;
-          case 'Waitlisted':
-            return span('warning');
-            break;
-          case 'Cancelled':
-            return span('default');
-            break;
-          default:
-            return span('default');
-            break;
-        }
-      },
-      colgroup,
-      thead,
-      tbody;
-  
-  colgroup = '<colgroup>' + model.headerOrder.reduce(function(p,c,i) {
-    return p + '<col style="width:' + colWidths[i] + 'px">';
-  }, '') + '</colgroup>';
-  
-  thead = '<thead><tr>' + model.headerOrder.reduce(function(p,c,i) {
-    return p + '<th style="width:' + colWidths[i] + 'px">' + c + '</th>';
-  },'') + '</tr></thead>';
-  
-  tbody = '<tbody>' + model.rawData.reduce(function(p,c) {
-    return p + '<tr data-id="' + c.pop() + '">' + c.reduce(function(prev, cur, ind) {
-      return prev + '<td>' + (ind === 0 && applyLabel(cur) || cur) + '</td>';
-    }, '') + '</tr>';
-  }, '') + '</tbody>';
-  
-  //table$.css('width',  + 'px');
-  tableHead$.html(thead);
-  tableBody$.html(colgroup + tbody);
-}
-*/
 
 // Convenience function to use Object's toString method to check data type when debugging
 function toS(o) {return Object.prototype.toString.call(o);}

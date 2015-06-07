@@ -81,11 +81,17 @@ $(init());
 // hooking/unhooking event handlers.
 function init() {
   $('.leaveType').on('change', createOtherTypeHandler());
-  $('#mealTime').datetimepicker({pickDate:false, minuteStepping:15});
-  $('#leaveTime').datetimepicker({pickDate:false, minuteStepping:15});
-  $('#returnTime').datetimepicker({pickDate:false, minuteStepping:15});
-  $('#startDate').datetimepicker({pickTime:false, maxDate: (new Date().getTime() + (1000*60*60*24*365))});
-  $('#endDate').datetimepicker({pickTime:false, maxDate: (new Date().getTime() + (1000*60*60*24*365))});
+  $('#mealTime').datetimepicker({format:'LT', stepping:15});
+  $('#leaveTime').datetimepicker({format:'LT', stepping:15});
+  $('#returnTime').datetimepicker({format:'LT', stepping:15});
+  $('#startDate').datetimepicker({format:'MM/DD/YYYY', maxDate: (new Date().getTime() + (1000*60*60*24*365))});
+  $('#endDate').datetimepicker({format:'MM/DD/YYYY', maxDate: (new Date().getTime() + (1000*60*60*24*365))});
+  $("#startDate").on("dp.change", function (e) {
+      $('#endDate').data("DateTimePicker").minDate(e.date);
+  });
+  $("#endDate").on("dp.change", function (e) {
+      $('#startDate').data("DateTimePicker").maxDate(e.date);
+  });
   $('html').on('click', '#resetDates', function() {$('#startDate').val(''); $('#endDate').val('');});
   setCollapseButton('#partial-shift', 'Cancel partial shift');
   $('html').on('click', '#yesMeal', showMealPeriod);

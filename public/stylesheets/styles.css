@@ -14,7 +14,7 @@ body {
   padding: 10px;
 }
 
-input, select {
+#mainView input, select {
   margin: 0 7px;
 }
 
@@ -23,7 +23,12 @@ input, select {
 }
 
 #decisionSwitches label {
-  margin: 0 14px
+  margin: 0px 8px;
+  border-radius: 5px;
+}
+
+#submitDecision {
+  margin: 0 18px 0 0;
 }
 
 .startDate {
@@ -136,8 +141,7 @@ input, select {
 }
 
 #allFilterDiv, #requests {
-  max-width: 1150px;
-  min-width: 930px;
+  width: 1150px;
 }
 
 .supervisor-interface .confirmSuccess {

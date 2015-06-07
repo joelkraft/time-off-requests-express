@@ -96,15 +96,11 @@
     .row
       div(class='center-block' id='allFilterDiv')
         div(class='input-group pull-right', id='filter')
-          .input-group-btn
-            button(type='button', class='btn btn-default dropdown-toggle', data-toggle='dropdown') Search 
-              span(class='caret')
-            ul(class='dropdown-menu', role='menu')
-              li
-                a(href='#' data-filter='search') Search
-              li
-                a(href='#' data-filter='holiday') Holiday
-          input(type='text' class='form-control grapes moremoutain')
+          .input-group
+            span(class='input-group-addon') Search
+            input.form-control#search-bar(type='text' placeholder="Type search here")
+
+      // This was markup for multiple selectable filters, may reinstate
         div(class='form-group pull-right' id='deptFilterSwitches')
           div(class='btn-group' data-toggle='buttons')
             label(class='btn btn-default active' id='deptAll')
@@ -116,6 +112,7 @@
             label(class='btn btn-default' id='deptCirc')
               input(type='radio' name='options' id='option3')
               |Circulation
+
     .row
       div(id='requests' class='center-block')
         table(id='requestsHeader')
