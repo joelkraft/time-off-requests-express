@@ -185,6 +185,7 @@ function logObj(s) {
   };
   
   Controller.prototype.prettyDate = function(ms,formatString) {
+    if (!ms) return ''
     ms = parseInt(ms)
     return moment(ms).format(formatString)
   }
