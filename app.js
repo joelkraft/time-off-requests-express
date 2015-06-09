@@ -10,7 +10,7 @@ var routes = require('./routes/index')
 var users = require('./routes/users')
 var collections = require('./routes/collections')
 
-var mongoURL = process.env.MONGOHQ_URL || 'mongodb://@localhost:27017/test'
+var mongoURL = process.env.MONGOLAB_URI || 'mongodb://@localhost:27017/test'
 var db = mongoskin.db(mongoURL, {safe: true})
 
 var app = express()
