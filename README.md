@@ -2,7 +2,7 @@
 
 This is a simplified version of a time-off request app I built to increase the efficiency, dependability and ease around asking and being approved for time off at my job.  
 
-As you can see, it's an [Expressjs] REST service (with [Mongo]) connected to a hand-coded client (using [bootstrap], [jquery], [momentjs] and a [datetimepicker]).  For the sake of ease and simplicity I've side-stepped authentication in this version.  
+As you can see, it's an [Expressjs] REST service (connected to a [Mongodb] instance) called by a hand-coded client (using [bootstrap], [jquery], [momentjs] and a [datetimepicker]).  For the sake of ease and simplicity I've side-stepped authentication in this version.
 
 ##Please play with it [here].
 
