@@ -45,7 +45,6 @@ router.post('/:collectionName', function (req, res, next) {
 })
 
 router.get('/:collectionName/:id', function (req, res, next) {
-  console.log('route called')
   req.collection.findById(req.params.id, function (e, result) {
     if (e) return next (e)
     res.send(result)
@@ -56,7 +55,6 @@ router.put('/:collectionName/:id', function (req, res, next) {
 	req.collection.updateById(
 		req.params.id, 
 		{$set: req.body}, 
-		{safe:true, multi:false},
 		function (e, result) {
 			if (e) return next(e)
 			res.send((result === 1) ? {msg:'success'} : {msg:'error'})
