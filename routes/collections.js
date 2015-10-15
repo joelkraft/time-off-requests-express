@@ -57,7 +57,7 @@ router.put('/:collectionName/:id', function (req, res, next) {
 		{$set: req.body}, 
 		function (e, result) {
 			if (e) return next(e)
-			res.send((result === 1) ? {msg:'success'} : {msg:'error'})
+			res.send((result.ok === 1) ? {msg:'success'} : {msg:'error'})
 		}
 	)
 })
@@ -65,7 +65,7 @@ router.put('/:collectionName/:id', function (req, res, next) {
 router.delete('/:collectionName/:id', function (req, res, next) {
 	req.collection.removeById(req.params.id, function (e, result) {
 		if (e) return next(e)
-		res.send((result === 1) ? {msg: 'success'} : {msg: 'error'})
+		res.send((result.ok === 1) ? {msg: 'success'} : {msg: 'error'})
 	})
 })
 
